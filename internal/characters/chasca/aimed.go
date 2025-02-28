@@ -124,7 +124,7 @@ func (c *char) aimSkillHold(p map[string]int) (action.Info, error) {
 		return action.Info{}, errors.New("bullets must be > 0")
 	}
 
-	if c.StatusIsActive(c6key) && count < 6 {
+	if c.StatusIsActive(c6IcdKey) && !c.c6ChargeUsed && count < 6 {
 		return action.Info{}, errors.New("bullets must be 6 when c6 instant charge is active")
 	}
 	c.loadSkillHoldBullets()

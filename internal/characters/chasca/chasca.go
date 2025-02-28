@@ -29,6 +29,8 @@ type char struct {
 	skillParticleICD     bool
 	c2Src                int
 	c4Src                int
+	c6ChargeUsed         bool
+	c6ApplyCDBuff        bool
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {

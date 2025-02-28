@@ -7,8 +7,6 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 )
 
-const c6key = "chasca-c6"
-const c6BuffKey = "chasca-c6-cdmg-buff"
 const c6IcdKey = "chasca-c6-icd"
 
 func (c *char) c1() float64 {
@@ -102,7 +100,7 @@ func (c *char) c6() {
 		return
 	}
 	c.AddStatus(c6IcdKey, 3*60, true)
-	c.AddStatus(c6key, 3*60, true)
+	c.c6ChargeUsed = false
 }
 
 // if the c6 instant bullet load status is active, this adds c6 cdmg status and removes the instant load status
@@ -115,16 +113,20 @@ func (c *char) c6AddBuff() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	if !c.StatusIsActive(c6key) {
+	if !c.StatusIsActive(c6IcdKey) {
 		return
 	}
-	c.AddStatus(c6BuffKey, 30, false)
-	c.DeleteStatus(c6key)
+	if c.c6ChargeUsed {
+		return
+	}
+
+	// Can only be called as a bullet is fired, so no need for a status
+	// Will always be set back to false before the next aim starts loading
+	c.c6ApplyCDBuff = true
+	c.c6ChargeUsed = true
 }
 
 func (c *char) c6buff() func(*combat.Snapshot) {
-	buffActive := c.StatusIsActive(c6BuffKey)
-	c.DeleteStatus(c6BuffKey)
 	return func(snap *combat.Snapshot) {
 		if c.Base.Cons < 6 {
 			return
@@ -132,22 +134,21 @@ func (c *char) c6buff() func(*combat.Snapshot) {
 		if c.Base.Ascension < 1 {
 			return
 		}
-		if !buffActive {
+		if !c.c6ApplyCDBuff {
 			return
 		}
+		c.c6ApplyCDBuff = false
 		old := snap.Stats[attributes.CD]
 		snap.Stats[attributes.CD] += 1.20
 		c.Core.Log.NewEvent("c6 adding crit dmg", glog.LogCharacterEvent, c.Index).
 			Write("old", old).
 			Write("new", snap.Stats[attributes.CD])
 	}
+
 }
 
 func (c *char) c6ChargeTime(count int) int {
-	if c.Base.Cons < 6 {
-		return cumuSkillAimLoadFrames[count-1]
-	}
-	if c.StatusIsActive(c6key) {
+	if c.StatusIsActive(c6IcdKey) && !c.c6ChargeUsed {
 		return cumuSkillAimLoadFramesC6Instant[count-1]
 	}
 	return cumuSkillAimLoadFramesC6[count-1]
