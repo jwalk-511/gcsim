@@ -53,47 +53,78 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		c.NormalCounter = c.savedNormalCounter
 	}
 
-	for i, mult := range attack[c.NormalCounter] {
-		ai := combat.AttackInfo{
-			ActorIndex:         c.Index,
-			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
-			AttackTag:          attacks.AttackTagNormal,
-			ICDTag:             attacks.ICDTagNormalAttack,
-			ICDGroup:           attacks.ICDGroupDefault,
-			StrikeType:         attacks.StrikeTypeDefault,
-			Element:            attributes.Cryo,
-			Durability:         25,
-			Mult:               mult[c.TalentLvlAttack()],
-			HitlagFactor:       attackHitlagFactor[c.NormalCounter][i],
-			HitlagHaltFrames:   attackHitlagHaltFrame[c.NormalCounter][i] * 60,
-			CanBeDefenseHalted: true,
-		}
-		c1N5CB := c.makeC1N5CB() // here so that the normalcounter check is correct
-		c.QueueCharTask(func() {
-			// TODO: when should this check happen?
-			skillIndex := 0
-			var particleCB combat.AttackCBFunc
-			var chillingPenalty combat.AttackCBFunc
-			if c.skillBuffActive() {
-				skillIndex = 1
-				particleCB = c.particleCB
-				chillingPenalty = c.chillingPenalty
+	actI := action.Info{
+		Frames:          frames.NewAttackFunc(c.Character, attackFrames),
+		AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],
+		CanQueueAfter:   attackHitmarks[c.NormalCounter][len(attackHitmarks[c.NormalCounter])-1],
+		State:           action.NormalAttackState,
+	}
+
+	// If Early_Cancel is given, do not allow any damage to occur. All frames are the same; except dash and jump can occur after early_cancel frames.
+	// At least 1 frame must be allowed (TODO: Is it more than 1?)
+	earlyCancel := p["early_cancel"]
+	if earlyCancel < 0 {
+		earlyCancel = 0
+	}
+	if earlyCancel == 0 {
+		for i, mult := range attack[c.NormalCounter] {
+			ai := combat.AttackInfo{
+				ActorIndex:         c.Index,
+				Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
+				AttackTag:          attacks.AttackTagNormal,
+				ICDTag:             attacks.ICDTagNormalAttack,
+				ICDGroup:           attacks.ICDGroupDefault,
+				StrikeType:         attacks.StrikeTypeDefault,
+				Element:            attributes.Cryo,
+				Durability:         25,
+				Mult:               mult[c.TalentLvlAttack()],
+				HitlagFactor:       attackHitlagFactor[c.NormalCounter][i],
+				HitlagHaltFrames:   attackHitlagHaltFrame[c.NormalCounter][i] * 60,
+				CanBeDefenseHalted: true,
 			}
-			c.Core.QueueAttack(
-				ai,
-				combat.NewBoxHitOnTarget(
-					c.Core.Combat.Player(),
-					geometry.Point{Y: attackOffsets[skillIndex]},
-					attackHitboxes[skillIndex][c.NormalCounter][0],
-					attackHitboxes[skillIndex][c.NormalCounter][1],
-				),
-				0,
-				0,
-				c1N5CB,
-				particleCB,
-				chillingPenalty,
-			)
-		}, attackHitmarks[c.NormalCounter][i])
+			c1N5CB := c.makeC1N5CB() // here so that the normalcounter check is correct
+			c.QueueCharTask(func() {
+				// TODO: when should this check happen?
+				skillIndex := 0
+				var particleCB combat.AttackCBFunc
+				var chillingPenalty combat.AttackCBFunc
+				if c.skillBuffActive() {
+					skillIndex = 1
+					particleCB = c.particleCB
+					chillingPenalty = c.chillingPenalty
+				}
+				c.Core.QueueAttack(
+					ai,
+					combat.NewBoxHitOnTarget(
+						c.Core.Combat.Player(),
+						geometry.Point{Y: attackOffsets[skillIndex]},
+						attackHitboxes[skillIndex][c.NormalCounter][0],
+						attackHitboxes[skillIndex][c.NormalCounter][1],
+					),
+					0,
+					0,
+					c1N5CB,
+					particleCB,
+					chillingPenalty,
+				)
+			}, attackHitmarks[c.NormalCounter][i])
+		}
+	} else {
+		actI = action.Info{
+			Frames: func(a action.Action) int {
+				switch a {
+				case action.ActionDash:
+					return earlyCancel
+				case action.ActionJump:
+					return earlyCancel
+				default:
+					return frames.NewAttackFunc(c.Character, attackFrames)(a)
+				}
+			},
+			AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],
+			CanQueueAfter:   earlyCancel,
+			State:           action.NormalAttackState,
+		}
 	}
 
 	defer func() {
@@ -101,10 +132,5 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		c.savedNormalCounter = c.NormalCounter
 	}()
 
-	return action.Info{
-		Frames:          frames.NewAttackFunc(c.Character, attackFrames),
-		AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],
-		CanQueueAfter:   attackHitmarks[c.NormalCounter][len(attackHitmarks[c.NormalCounter])-1],
-		State:           action.NormalAttackState,
-	}, nil
+	return actI, nil
 }
