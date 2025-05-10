@@ -1,5 +1,5 @@
 ---
-title: Tome Of The Eternal Flow
+title: Sunny Morning Sleep-In
 ---
 
 import AoETable from "@site/src/components/AoE/AoETable";
@@ -10,20 +10,20 @@ import FieldsTable from "@site/src/components/Fields/FieldsTable";
 
 ## AoE Data
 
-<AoETable item_key="tomeoftheeternalflow" data_src="weapon" />
+<AoETable item_key="sunnymorning" data_src="weapon" />
 
 ## Known issues
 
-<IssuesTable item_key="tomeoftheeternalflow" data_src="weapon" />
+<IssuesTable item_key="sunnymorning" data_src="weapon" />
 
 ## Names
 
-<NamesList item_key="tomeoftheeternalflow" data_src="weapon" />
+<NamesList item_key="sunnymorning" data_src="weapon" />
 
 ## Params
 
-<ParamsTable item_key="tomeoftheeternalflow" data_src="weapon" />
+<ParamsTable item_key="sunnymorning" data_src="weapon" />
 
 ## Fields
 
-<FieldsTable item_key="tomeoftheeternalflow" data_src="weapon" />
+<FieldsTable item_key="sunnymorning" data_src="weapon" />

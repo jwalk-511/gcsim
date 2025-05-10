@@ -198,9 +198,11 @@ var weaponNames = []string{
 	"starcallerswatch",
 	"sturdybone",
 	"summitshaper",
+	"sunnymorningsleepin",
 	"surfsup",
 	"swordofdescension",
 	"swordofnarzissenkreuz",
+	"symphonistofscents",
 	"talkingstick",
 	"tamayurateinoohanashi",
 	"thealleyflash",
@@ -225,6 +227,7 @@ var weaponNames = []string{
 	"ultimateoverlordsmegamagicsword",
 	"urakumisugiri",
 	"verdict",
+	"vividnotions",
 	"vortexvanquisher",
 	"wanderingevenstar",
 	"wastergreatsword",
@@ -407,9 +410,11 @@ const (
 	StarcallersWatch
 	SturdyBone
 	SummitShaper
+	SunnyMorningSleepIn
 	SurfsUp
 	SwordOfDescension
 	SwordOfNarzissenkreuz
+	SymphonistOfScents
 	TalkingStick
 	TamayurateiNoOhanashi
 	TheAlleyFlash
@@ -434,6 +439,7 @@ const (
 	UltimateOverlordsMegaMagicSword
 	UrakuMisugiri
 	Verdict
+	VividNotions
 	VortexVanquisher
 	WanderingEvenstar
 	WasterGreatsword
