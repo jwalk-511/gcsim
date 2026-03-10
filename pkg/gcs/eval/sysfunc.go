@@ -32,6 +32,7 @@ func (e *Eval) initSysFuncs(env *Env) {
 	// player/enemy
 	e.addSysFunc("set_target_pos", e.setTargetPos, env)
 	e.addSysFunc("set_player_pos", e.setPlayerPos, env)
+	e.addSysFunc("set_player_spd", e.setPlayerSpd, env)
 	e.addSysFunc("set_default_target", e.setDefaultTarget, env)
 	e.addSysFunc("set_swap_icd", e.setSwapICD, env)
 	e.addSysFunc("set_particle_delay", e.setParticleDelay, env)
@@ -176,6 +177,19 @@ func (e *Eval) setPlayerPos(c *ast.CallExpr, env *Env) (Obj, error) {
 
 	e.Core.Combat.SetPlayerPos(info.Point{X: x, Y: y})
 	e.Core.Combat.Player().SetDirectionToClosestEnemy()
+
+	return bton(true), nil
+}
+
+func (e *Eval) setPlayerSpd(c *ast.CallExpr, env *Env) (Obj, error) {
+	objs, err := e.validateArguments(c, env, typNum, typNum)
+	if err != nil {
+		return nil, err
+	}
+	s := ntof(objs[0].(*number))
+	delay := ntoi(objs[1].(*number))
+
+	e.Core.Player.SetPlayerSpd(s, int(delay))
 
 	return bton(true), nil
 }

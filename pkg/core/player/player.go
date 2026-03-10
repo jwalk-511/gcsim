@@ -20,6 +20,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/core/player/infusion"
 	"github.com/genshinsim/gcsim/pkg/core/player/shield"
+	"github.com/genshinsim/gcsim/pkg/core/speed"
 	"github.com/genshinsim/gcsim/pkg/core/task"
 )
 
@@ -71,6 +72,8 @@ type Handler struct {
 	verdantDewExpiryFrame int
 	verdantDew            int
 	partialDewCount       int
+
+	speed speed.Speed
 }
 
 type Opt struct {
@@ -240,10 +243,19 @@ func (h *Handler) ApplyHitlag(char int, factor, dur float64) {
 	// also extend infusion
 	// TODO: this is a really awkward place to apply this
 	h.ExtendInfusion(char, factor, dur)
+	// number of frames frozen is total duration * (1 - factor)
+	ext := int(math.Ceil(dur * (1 - factor)))
+	if h.speed.Spd() > 0 {
+		prevDisp := h.Displacement()
+		h.speed.ApplyHitlag(ext, *h.F)
+		evt := h.Log.NewEvent("Speed hitlag extended", glog.LogPlayerEvent, -1)
+		evt.Write("extension", ext).
+			Write("Prev displacement", prevDisp).
+			Write("New Displacement", h.Displacement())
+	}
 
 	// extend the dash cd by the hitlag extension amount
 	if h.DashCDExpirationFrame > *h.F {
-		ext := int(math.Ceil(dur * (1 - factor)))
 		h.DashCDExpirationFrame += ext
 
 		var evt glog.Event
@@ -405,4 +417,27 @@ func (h *Handler) GetMoonsignLevel() int {
 		count += c.Moonsign
 	}
 	return count
+}
+
+func (h *Handler) SetPlayerSpd(s float64, delay int) {
+	cb := func() {
+		prevDisp := h.Displacement()
+		h.speed.SetSpd(s, *h.F)
+		evt := h.Log.NewEvent("Player speed set", glog.LogPlayerEvent, -1)
+		evt.Write("speed", s).
+			Write("frame", *h.F).
+			Write("current displacement", h.Displacement()).
+			Write("Prev displacement", prevDisp)
+	}
+	if delay <= 0 {
+		cb()
+	} else {
+		h.Tasks.Add(func() {
+			cb()
+		}, delay)
+	}
+}
+
+func (h *Handler) Displacement() float64 {
+	return h.speed.Displacement(*h.F)
 }
