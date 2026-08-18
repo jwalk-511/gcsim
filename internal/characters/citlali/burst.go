@@ -24,8 +24,9 @@ const (
 
 var burstFrames []int
 
-func (c *char) spiritVesselSkullRandHitmark() int {
-	return spiritVesselSkullHitmark + 30 + c.Core.Rand.Intn(31)
+// delay between 0 and 30 inclusive
+func (c *char) spiritVesselSkullRandHitmark(delay int) int {
+	return spiritVesselSkullHitmark + 30 + delay
 }
 
 func init() {
@@ -38,7 +39,7 @@ func init() {
 	burstFrames[action.ActionSwap] = 110
 }
 
-func (c *char) Burst(_ map[string]int) (action.Info, error) {
+func (c *char) Burst(p map[string]int) (action.Info, error) {
 	aiIceStorm := info.AttackInfo{
 		ActorIndex:     c.Index(),
 		Abil:           iceStormAbil,
@@ -75,6 +76,17 @@ func (c *char) Burst(_ map[string]int) (action.Info, error) {
 	// initial hit
 	c.Core.QueueAttack(aiIceStorm, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 6.5), iceStormHitmark, iceStormHitmark)
 
+	skull, ok := p["skull"]
+	if !ok {
+		skull = 30
+	}
+	if skull < 0 {
+		skull = 0
+	}
+	if skull > 30 {
+		skull = 30
+	}
+
 	// skull hits
 	enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7), nil)
 	for i, enemy := range enemies {
@@ -84,7 +96,7 @@ func (c *char) Burst(_ map[string]int) (action.Info, error) {
 		c.QueueCharTask(func() {
 			c.generateNightsoulPoints(3.0)
 			c.Core.QueueAttack(aiSpiritVesselSkull, combat.NewCircleHitOnTarget(enemy.Pos(), nil, 3.5), 0, 0)
-		}, iceStormHitmark+c.spiritVesselSkullRandHitmark())
+		}, iceStormHitmark+c.spiritVesselSkullRandHitmark(skull))
 	}
 
 	return action.Info{
