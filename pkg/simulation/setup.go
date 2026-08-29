@@ -120,26 +120,24 @@ func SetupResonance(s *core.Core) {
 		}
 		switch k {
 		case attributes.Pyro:
-			m := make([]float64, attributes.EndStatType)
-			m[attributes.ATKP] = 0.25
+			m := 0.25
 			for _, c := range chars {
 				c.AddStatMod(character.StatMod{
 					Base:         modifier.NewBase("pyro-res", -1),
-					AffectedStat: attributes.NoStat,
-					Amount: func() []float64 {
+					AffectedStat: attributes.ATKP,
+					Amount: func() float64 {
 						return m
 					},
 				})
 			}
 		case attributes.Hydro:
 			// TODO: reduce pyro duration not implemented; may affect bennett Q?
-			m := make([]float64, attributes.EndStatType)
-			m[attributes.HPP] = 0.25
+			m := 0.25
 			for _, c := range chars {
 				c.AddStatMod(character.StatMod{
 					Base:         modifier.NewBase("hydro-res-hpp", -1),
 					AffectedStat: attributes.HPP,
-					Amount: func() []float64 {
+					Amount: func() float64 {
 						return m
 					},
 				})
@@ -280,20 +278,18 @@ func SetupResonance(s *core.Core) {
 				})
 			}
 		case attributes.Dendro:
-			m := make([]float64, attributes.EndStatType)
-			m[attributes.EM] = 50
+			m := 50.0
 			for _, c := range chars {
 				c.AddStatMod(character.StatMod{
 					Base:         modifier.NewBase("dendro-res-50", -1),
 					AffectedStat: attributes.EM,
-					Amount: func() []float64 {
+					Amount: func() float64 {
 						return m
 					},
 				})
 			}
 
-			twoBuff := make([]float64, attributes.EndStatType)
-			twoBuff[attributes.EM] = 30
+			twoBuff := 30.0
 			twoEl := func(args ...any) {
 				if _, ok := args[0].(*enemy.Enemy); !ok {
 					return
@@ -302,7 +298,7 @@ func SetupResonance(s *core.Core) {
 					c.AddStatMod(character.StatMod{
 						Base:         modifier.NewBaseWithHitlag("dendro-res-30", 6*60),
 						AffectedStat: attributes.EM,
-						Amount: func() []float64 {
+						Amount: func() float64 {
 							return twoBuff
 						},
 					})
@@ -313,14 +309,13 @@ func SetupResonance(s *core.Core) {
 			s.Events.Subscribe(event.OnLunarBloom, twoEl, "dendro-res")
 			s.Events.Subscribe(event.OnQuicken, twoEl, "dendro-res")
 
-			threeBuff := make([]float64, attributes.EndStatType)
-			threeBuff[attributes.EM] = 20
+			threeBuff := 20.0
 			threeEl := func(_ ...any) {
 				for _, c := range chars {
 					c.AddStatMod(character.StatMod{
 						Base:         modifier.NewBaseWithHitlag("dendro-res-20", 6*60),
 						AffectedStat: attributes.EM,
-						Amount: func() []float64 {
+						Amount: func() float64 {
 							return threeBuff
 						},
 					})

@@ -41,7 +41,7 @@ type (
 		modifier.Base
 		AffectedStat attributes.Stat
 		Extra        bool
-		Amount       func() []float64
+		Amount       func() float64
 	}
 )
 

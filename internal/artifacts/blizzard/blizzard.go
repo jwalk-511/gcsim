@@ -23,12 +23,11 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 	s := Set{Count: count}
 
 	if count >= 2 {
-		m := make([]float64, attributes.EndStatType)
-		m[attributes.CryoP] = 0.15
+		m := 0.15
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBase("bs-2pc", -1),
 			AffectedStat: attributes.CryoP,
-			Amount: func() []float64 {
+			Amount: func() float64 {
 				return m
 			},
 		})

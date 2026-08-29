@@ -29,13 +29,12 @@ func NewSet(core *core.Core, char *character.CharWrapper, count int, param map[s
 		return &s, nil
 	}
 
-	c2Buff := make([]float64, attributes.EndStatType)
-	c2Buff[attributes.ATKP] = 0.18
+	c2Buff := 0.18
 
 	char.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase("a-day-carved-from-rising-winds-2pc", -1),
 		AffectedStat: attributes.ATKP,
-		Amount: func() []float64 {
+		Amount: func() float64 {
 			return c2Buff
 		},
 	})
@@ -44,11 +43,9 @@ func NewSet(core *core.Core, char *character.CharWrapper, count int, param map[s
 		return &s, nil
 	}
 
-	c4Buff := make([]float64, attributes.EndStatType)
-	c4Buff[attributes.ATKP] = 0.25
+	c4Buff := 0.25
 
-	c4BuffHexerei := make([]float64, attributes.EndStatType)
-	c4BuffHexerei[attributes.CR] = 0.2
+	c4BuffHexerei := 0.2
 
 	core.Events.Subscribe(event.OnEnemyDamage, func(args ...any) {
 		if _, ok := args[0].(*enemy.Enemy); !ok {
@@ -75,7 +72,7 @@ func NewSet(core *core.Core, char *character.CharWrapper, count int, param map[s
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("blessing-of-pastoral-winds", 6*60),
 			AffectedStat: attributes.ATKP,
-			Amount: func() []float64 {
+			Amount: func() float64 {
 				return c4Buff
 			},
 		})
@@ -87,7 +84,7 @@ func NewSet(core *core.Core, char *character.CharWrapper, count int, param map[s
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("resolve-of-pastoral-winds", 6*60),
 			AffectedStat: attributes.CR,
-			Amount: func() []float64 {
+			Amount: func() float64 {
 				return c4BuffHexerei
 			},
 		})

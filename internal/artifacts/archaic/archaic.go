@@ -27,19 +27,16 @@ func NewSet(core *core.Core, char *character.CharWrapper, count int, param map[s
 	s := Set{Count: count}
 
 	if count >= 2 {
-		m := make([]float64, attributes.EndStatType)
-		m[attributes.GeoP] = 0.15
+		m := 0.15
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBase("archaic-2pc", -1),
 			AffectedStat: attributes.GeoP,
-			Amount: func() []float64 {
+			Amount: func() float64 {
 				return m
 			},
 		})
 	}
 	if count >= 4 {
-		m := make([]float64, attributes.EndStatType)
-
 		enableSet := func(e attributes.Element) {
 			s.element = e
 			// Activate
@@ -47,22 +44,13 @@ func NewSet(core *core.Core, char *character.CharWrapper, count int, param map[s
 			core.Log.NewEvent("archaic petra proc'd", glog.LogArtifactEvent, char.Index()).
 				Write("ele", s.element)
 
-			m[attributes.PyroP] = 0
-			m[attributes.HydroP] = 0
-			m[attributes.CryoP] = 0
-			m[attributes.ElectroP] = 0
-			m[attributes.AnemoP] = 0
-			m[attributes.GeoP] = 0
-			m[attributes.DendroP] = 0
-			m[attributes.EleToDmgP(s.element)] = 0.35 // 35%
-
 			// Apply mod to all characters
 			for _, c := range core.Player.Chars() {
 				c.AddStatMod(character.StatMod{
 					Base:         modifier.NewBaseWithHitlag("archaic-4pc", 10*60),
-					AffectedStat: attributes.NoStat,
-					Amount: func() []float64 {
-						return m
+					AffectedStat: attributes.EleToDmgP(s.element),
+					Amount: func() float64 {
+						return 0.35
 					},
 				})
 			}

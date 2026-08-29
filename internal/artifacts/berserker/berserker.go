@@ -22,12 +22,11 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 
 	// 2 Piece: CRIT Rate +12%
 	if count >= 2 {
-		m := make([]float64, attributes.EndStatType)
-		m[attributes.CR] = 0.12
+		m := 0.12
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBase("berserker-2pc", -1),
 			AffectedStat: attributes.CR,
-			Amount: func() []float64 {
+			Amount: func() float64 {
 				return m
 			},
 		})

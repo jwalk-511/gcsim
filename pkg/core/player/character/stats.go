@@ -34,10 +34,8 @@ func (c *CharWrapper) Stats() ([attributes.EndStatType]float64, []any) {
 		}
 
 		amt := m.Amount()
-		reject := amt == nil
-		for k, v := range amt {
-			stats[k] += v
-		}
+		reject := amt == 0
+		stats[m.AffectedStat] += amt
 		c.mods[n] = m
 		n++
 
@@ -79,14 +77,12 @@ func (c *CharWrapper) Stat(s attributes.Stat) float64 {
 			continue
 		}
 		// ignore this mod if stat type doesnt match
-		if m.AffectedStat != attributes.NoStat && m.AffectedStat != s {
+		if m.AffectedStat != s {
 			continue
 		}
 		// check expiry
 		if m.Expiry() > *c.f || m.Expiry() == -1 {
-			if amt := m.Amount(); amt != nil {
-				val += amt[s]
-			}
+			val += m.Amount()
 		}
 	}
 
@@ -101,7 +97,7 @@ func (c *CharWrapper) NonExtraStat(s attributes.Stat) float64 {
 			continue
 		}
 		// ignore this mod if stat type doesnt match
-		if m.AffectedStat != attributes.NoStat && m.AffectedStat != s {
+		if m.AffectedStat != s {
 			continue
 		}
 		// is extra stat
@@ -110,9 +106,7 @@ func (c *CharWrapper) NonExtraStat(s attributes.Stat) float64 {
 		}
 		// check expiry
 		if m.Expiry() > *c.f || m.Expiry() == -1 {
-			if amt := m.Amount(); amt != nil {
-				val += amt[s]
-			}
+			val += m.Amount()
 		}
 	}
 
@@ -131,7 +125,7 @@ func (c *CharWrapper) SelectStat(nonExtra bool, stat ...attributes.Stat) attribu
 			continue
 		}
 		// ignore this mod if stat type doesnt match
-		if m.AffectedStat != attributes.NoStat && !slices.Contains(stat, m.AffectedStat) {
+		if !slices.Contains(stat, m.AffectedStat) {
 			continue
 		}
 		// skip if extra stat
@@ -140,11 +134,7 @@ func (c *CharWrapper) SelectStat(nonExtra bool, stat ...attributes.Stat) attribu
 		}
 		// check expiry
 		if m.Expiry() > *c.f || m.Expiry() == -1 {
-			if amt := m.Amount(); amt != nil {
-				for _, k := range stat {
-					stats[k] += amt[k]
-				}
-			}
+			stats[m.AffectedStat] += m.Amount()
 		}
 	}
 

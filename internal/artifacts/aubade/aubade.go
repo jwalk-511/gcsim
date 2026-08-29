@@ -32,12 +32,11 @@ func (s *Set) Init() error {
 		return nil
 	}
 
-	m := make([]float64, attributes.EndStatType)
-	m[attributes.EM] = 80
+	m := 80.0
 	s.char.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase("aubade-2pc", -1),
 		AffectedStat: attributes.EM,
-		Amount: func() []float64 {
+		Amount: func() float64 {
 			return m
 		},
 	})
